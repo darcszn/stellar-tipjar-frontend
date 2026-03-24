@@ -14,6 +14,8 @@ const config: Config = {
         sunrise: "#ff785a",
         wave: "#0f6c7b",
         moss: "#5f7f41",
+        error: "#ef4444",
+        success: "#22c55e",
       },
       boxShadow: {
         card: "0 20px 45px -28px rgba(15, 108, 123, 0.45)",
