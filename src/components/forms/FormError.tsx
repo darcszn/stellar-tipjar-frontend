@@ -4,12 +4,10 @@ interface FormErrorProps {
 }
 
 export function FormError({ id, message }: FormErrorProps) {
-  if (!message) {
-    return null;
-  }
+  if (!message) return null;
 
   return (
-    <p id={id} role="status" aria-live="polite" className="mt-1 text-xs text-error">
+    <p id={id} role="alert" aria-live="assertive" className="mt-1 text-xs text-error">
       {message}
     </p>
   );

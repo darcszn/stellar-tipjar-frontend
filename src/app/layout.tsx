@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { Navbar } from "@/components/Navbar";
+import { SkipToContent } from "@/components/SkipToContent";
 import { WalletProvider } from "@/contexts/WalletContext";
 import "@/styles/globals.css";
 import { buildMetadata } from "@/utils/seo";
@@ -43,10 +44,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+        <SkipToContent />
         <WalletProvider>
           <div className="min-h-screen">
             <Navbar />
-            <main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">{children}</main>
+            <main
+              id="main-content"
+              tabIndex={-1}
+              className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8 focus:outline-none"
+            >
+              {children}
+            </main>
           </div>
           <InstallPrompt />
         </WalletProvider>

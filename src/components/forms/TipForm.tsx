@@ -68,7 +68,12 @@ export function TipForm({ username, defaultAssetCode = "XLM" }: TipFormProps) {
   };
 
   return (
-    <form className="mt-6 space-y-4" onSubmit={handleSubmit(onSubmit)} noValidate>
+    <form
+      className="mt-6 space-y-4"
+      onSubmit={handleSubmit(onSubmit)}
+      noValidate
+      aria-label={`Send a tip to ${username}`}
+    >
       <div className="grid gap-4 sm:grid-cols-2">
         <FormInput
           label="Amount"
@@ -90,9 +95,10 @@ export function TipForm({ username, defaultAssetCode = "XLM" }: TipFormProps) {
         />
       </div>
 
-      <label className="block text-sm font-medium text-ink">
-        <span>Message (optional)</span>
+      <div className="block text-sm font-medium text-ink">
+        <label htmlFor="tip-message">Message (optional)</label>
         <textarea
+          id="tip-message"
           className={`mt-1 min-h-24 w-full rounded-xl border bg-white px-3 py-2 text-sm text-ink placeholder:text-ink/40 focus:outline-none focus:ring-2 ${
             errors.message ? "border-error/60 focus:ring-error/30" : "border-ink/20 focus:ring-wave/30"
           }`}
@@ -102,7 +108,7 @@ export function TipForm({ username, defaultAssetCode = "XLM" }: TipFormProps) {
           {...register("message")}
         />
         <FormError id="tip-message-error" message={errors.message?.message} />
-      </label>
+      </div>
 
       {submitError ? (
         <p role="alert" aria-live="assertive" className="rounded-lg border border-error/30 bg-error/5 px-3 py-2 text-sm text-error">
@@ -117,7 +123,12 @@ export function TipForm({ username, defaultAssetCode = "XLM" }: TipFormProps) {
       ) : null}
 
       <div className="flex flex-wrap gap-3">
-        <Button type="submit" disabled={isSubmitting}>
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          aria-label={isSubmitting ? "Submitting tip, please wait" : "Submit tip"}
+          aria-busy={isSubmitting}
+        >
           {isSubmitting ? "Creating Intent..." : "Create Tip Intent"}
         </Button>
       </div>

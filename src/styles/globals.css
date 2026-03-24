@@ -37,6 +37,25 @@ a {
   text-decoration: none;
 }
 
+/* Ensure visible focus indicators for keyboard users */
+:focus-visible {
+  outline: 2px solid var(--accent-alt);
+  outline-offset: 2px;
+}
+
+/* Screen-reader only utility (complements Tailwind's sr-only) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
 .soft-grid {
   background-image:
     linear-gradient(rgba(21, 21, 21, 0.06) 1px, transparent 1px),
