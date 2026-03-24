@@ -5,12 +5,21 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Navbar } from "@/components/Navbar";
 import { WalletProvider } from "@/contexts/WalletContext";
 import "@/styles/globals.css";
+import { buildMetadata } from "@/utils/seo";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Stellar Tip Jar",
-  description: "Tip your favorite creators with Stellar assets.",
+  ...buildMetadata({
+    title: "Stellar Tip Jar",
+    description: "Support creators globally with low-fee Stellar tips.",
+  }),
+  title: {
+    default: "Stellar Tip Jar",
+    template: "%s | Stellar Tip Jar",
+  },
+  keywords: ["stellar", "tip jar", "crypto tips", "creator support", "blockchain payments"],
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({

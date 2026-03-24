@@ -1,4 +1,13 @@
 import Link from "next/link";
+import type { Metadata } from "next";
+
+import { buildMetadata } from "@/utils/seo";
+
+export const metadata: Metadata = buildMetadata({
+  title: "Explore Creators",
+  description: "Discover creators you can support with Stellar tips.",
+  path: "/explore",
+});
 
 const creatorExamples = ["alice", "stellar-dev", "pixelmaker", "community-lab"];
 
