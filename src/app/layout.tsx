@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { Navbar } from "@/components/Navbar";
+import { ReactQueryProvider } from "@/components/ReactQueryProvider";
 import { SkipToContent } from "@/components/SkipToContent";
 import { WalletProvider } from "@/contexts/WalletContext";
 import "@/styles/globals.css";
@@ -46,6 +47,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <SkipToContent />
         <WalletProvider>
+          <ReactQueryProvider>
           <div className="min-h-screen">
             <Navbar />
             <main
@@ -57,6 +59,7 @@ export default function RootLayout({
             </main>
           </div>
           <InstallPrompt />
+          </ReactQueryProvider>
         </WalletProvider>
       </body>
     </html>
