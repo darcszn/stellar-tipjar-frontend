@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { Button } from "@/components/Button";
@@ -6,11 +7,27 @@ import { TipForm } from "@/components/forms/TipForm";
 import { creatorUsernameSchema } from "@/schemas/creatorSchema";
 import { getCreatorProfile } from "@/services/api";
 import { formatUsername } from "@/utils/format";
+import { buildMetadata, creatorProfileJsonLd } from "@/utils/seo";
 
 interface CreatorPageProps {
   params: {
     username: string;
   };
+}
+
+export async function generateMetadata({ params }: CreatorPageProps): Promise<Metadata> {
+  const parsed = creatorUsernameSchema.safeParse(params.username);
+  if (!parsed.success) return {};
+  try {
+    const profile = await getCreatorProfile(parsed.data);
+    return buildMetadata({
+      title: profile.displayName,
+      description: profile.bio || `Support ${profile.displayName} with Stellar tips.`,
+      path: `/creator/${parsed.data}`,
+    });
+  } catch {
+    return {};
+  }
 }
 
 export default async function CreatorPage({ params }: CreatorPageProps) {
@@ -23,6 +40,18 @@ export default async function CreatorPage({ params }: CreatorPageProps) {
 
   return (
     <section className="space-y-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            creatorProfileJsonLd({
+              username: profile.username,
+              displayName: profile.displayName,
+              bio: profile.bio,
+            })
+          ),
+        }}
+      />
       <div className="rounded-3xl border border-ink/10 bg-[color:var(--surface)] p-8 shadow-card">
         <p className="text-xs uppercase tracking-wide text-wave">Creator Profile</p>
         <h1 className="mt-2 text-3xl font-bold text-ink sm:text-4xl">{profile.displayName}</h1>
