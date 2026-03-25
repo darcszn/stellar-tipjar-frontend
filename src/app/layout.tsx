@@ -7,6 +7,7 @@ import { Navbar } from "@/components/Navbar";
 import { ReactQueryProvider } from "@/components/ReactQueryProvider";
 import { SkipToContent } from "@/components/SkipToContent";
 import { WalletProvider } from "@/contexts/WalletContext";
+import { WebSocketProvider } from "@/contexts/WebSocketContext";
 import "@/styles/globals.css";
 import { buildMetadata } from "@/utils/seo";
 

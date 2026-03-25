@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { NotificationBadge } from "@/components/NotificationBadge";
 import { WalletConnector } from "@/components/WalletConnector";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -40,7 +41,10 @@ export function Navbar() {
           ))}
         </ul>
 
-        <WalletConnector />
+        <div className="flex items-center gap-2">
+          <NotificationBadge />
+          <WalletConnector />
+        </div>
       </nav>
     </header>
   );
