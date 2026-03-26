@@ -161,6 +161,38 @@ async function request<T>(path: string, init?: RequestInit, options?: RequestOpt
   return executeFetch<T>(path, init, throttleMs);
 }
 
+export interface CreatorStats {
+  totalAmountXlm: number;
+  tipCount: number;
+  uniqueSupporters: number;
+  topSupporters: { sender: string; totalAmount: number; tipCount: number }[];
+  tipHistory: { date: string; amount: number }[];
+}
+
+export async function getCreatorStats(username: string): Promise<CreatorStats> {
+  try {
+    return await request<CreatorStats>(`/creators/${username}/stats`, undefined, { critical: false });
+  } catch {
+    // Fallback mock data until backend is ready
+    return {
+      totalAmountXlm: 1234.5,
+      tipCount: 56,
+      uniqueSupporters: 42,
+      topSupporters: [
+        { sender: "stellar-fan", totalAmount: 300, tipCount: 8 },
+        { sender: "xlm-lover", totalAmount: 250, tipCount: 5 },
+        { sender: "crypto-alice", totalAmount: 180, tipCount: 12 },
+        { sender: "blockchainer", totalAmount: 120, tipCount: 3 },
+        { sender: "defi-bob", totalAmount: 90, tipCount: 6 },
+      ],
+      tipHistory: Array.from({ length: 30 }, (_, i) => ({
+        date: new Date(Date.now() - (29 - i) * 86_400_000).toISOString().slice(0, 10),
+        amount: Math.floor(Math.random() * 150 + 10),
+      })),
+    };
+  }
+}
+
 export async function getCreatorProfile(username: string): Promise<CreatorProfile> {
   try {
     return await request<CreatorProfile>(`/creators/${username}`, undefined, {

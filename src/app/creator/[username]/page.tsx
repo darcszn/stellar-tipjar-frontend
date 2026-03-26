@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { Button } from "@/components/Button";
 import { TipForm } from "@/components/forms/TipForm";
+import { CreatorStatsDashboard } from "@/components/stats/CreatorStatsDashboard";
 import { creatorUsernameSchema } from "@/schemas/creatorSchema";
 import { getCreatorProfile } from "@/services/api";
 import { formatUsername } from "@/utils/format";
@@ -77,6 +78,11 @@ export default async function CreatorPage({ params }: CreatorPageProps) {
           </p>
           <TipForm username={profile.username} defaultAssetCode={profile.preferredAsset} />
         </div>
+      </div>
+
+      <div>
+        <h2 className="mb-4 text-xl font-semibold text-ink">Statistics</h2>
+        <CreatorStatsDashboard username={profile.username} />
       </div>
     </section>
   );
