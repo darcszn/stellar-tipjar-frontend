@@ -1,4 +1,9 @@
+"use client";
+
+import { motion } from "framer-motion";
 import { ButtonHTMLAttributes, forwardRef } from "react";
+
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 type ButtonVariant = "primary" | "secondary" | "ghost" | "tertiary";
 
@@ -21,16 +26,21 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   { children, className = "", variant = "primary", type = "button", disabled, ...props },
   ref
 ) {
+  const prefersReduced = useReducedMotion();
+
   return (
-    <button
+    <motion.button
       ref={ref}
       type={type}
       disabled={disabled}
       aria-disabled={disabled}
-      className={`inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition-transform duration-150 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 ${variantStyles[variant]} ${className}`}
-      {...props}
+      className={`inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 ${variantStyles[variant]} ${className}`}
+      whileHover={prefersReduced || disabled ? undefined : { y: -2 }}
+      whileTap={prefersReduced || disabled ? undefined : { scale: 0.96 }}
+      transition={{ duration: 0.15, ease: "easeOut" }}
+      {...(props as object)}
     >
       {children}
-    </button>
+    </motion.button>
   );
 });

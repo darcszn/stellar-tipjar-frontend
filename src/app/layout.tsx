@@ -7,6 +7,7 @@ import { Navbar } from "@/components/Navbar";
 import { PerformanceMonitor } from "@/components/PerformanceMonitor";
 import { ReactQueryProvider } from "@/components/ReactQueryProvider";
 import { SkipToContent } from "@/components/SkipToContent";
+import { PageTransition } from "@/components/animations/PageTransition";
 import { WalletProvider } from "@/contexts/WalletContext";
 import { WebSocketProvider } from "@/contexts/WebSocketContext";
 import "@/styles/globals.css";
@@ -58,7 +59,7 @@ export default function RootLayout({
               tabIndex={-1}
               className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8 focus:outline-none"
             >
-              {children}
+              <PageTransition>{children}</PageTransition>
             </main>
           </div>
           <InstallPrompt />
