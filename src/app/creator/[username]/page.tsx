@@ -7,12 +7,14 @@ import { TipForm } from "@/components/forms/TipForm";
 import { CreatorStatsDashboard } from "@/components/stats/CreatorStatsDashboard";
 import { TipComments } from "@/components/TipComments";
 import { CreatorPageRecommendations } from "@/components/CreatorPageRecommendations";
+import { EventCalendar } from "@/components/EventCalendar";
 import { creatorUsernameSchema } from "@/schemas/creatorSchema";
 import { getCreatorProfile } from "@/services/api";
 import { formatUsername } from "@/utils/format";
 import { generateAvatarUrl } from "@/utils/imageUtils";
 import { buildMetadata, creatorProfileJsonLd } from "@/utils/seo";
 import { OptimizedImage } from "@/components/OptimizedImage";
+import { PortfolioSection } from "@/components/portfolio/PortfolioSection";
 
 interface CreatorPageProps {
   params: {
@@ -99,6 +101,8 @@ export default async function CreatorPage({ params }: CreatorPageProps) {
       </div>
 
       <TipComments creatorUsername={profile.username} />
+
+      <EventCalendar creatorUsername={profile.username} />
 
       <CreatorPageRecommendations username={profile.username} />
     </section>

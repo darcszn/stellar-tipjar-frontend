@@ -9,6 +9,7 @@ import { ReactQueryProvider } from "@/components/ReactQueryProvider";
 import { SkipToContent } from "@/components/SkipToContent";
 import { PageTransition } from "@/components/animations/PageTransition";
 import { WalletProvider } from "@/contexts/WalletContext";
+import { CurrencyProvider } from "@/contexts/CurrencyContext";
 import { WebSocketProvider } from "@/contexts/WebSocketContext";
 import "@/styles/globals.css";
 import { buildMetadata } from "@/utils/seo";
@@ -50,6 +51,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <SkipToContent />
         <PerformanceMonitor />
+        <CurrencyProvider>
         <WalletProvider>
           <ReactQueryProvider>
             <WebSocketProvider>
@@ -67,6 +69,7 @@ export default function RootLayout({
             </WebSocketProvider>
           </ReactQueryProvider>
         </WalletProvider>
+        </CurrencyProvider>
       </body>
     </html>
   );
