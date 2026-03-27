@@ -11,6 +11,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { usePagination } from "@/hooks/usePagination";
 import { useSearchParams } from "@/hooks/useSearchParams";
 import { RecommendedCreators } from "@/components/RecommendedCreators";
+import { Leaderboards } from "@/components/Leaderboards/Leaderboards";
 import { useRecommendations } from "@/hooks/useRecommendations";
 
 import { CATEGORIES, TagWithCount } from "@/utils/categories";
@@ -201,6 +202,8 @@ export default function ExplorePage() {
 
       <RecommendedCreators limit={3} />
 
+      <Leaderboards />
+
       <div className="space-y-4">
         <SearchBar
           value={search}
@@ -208,6 +211,7 @@ export default function ExplorePage() {
           placeholder="Search creators by name or username..."
           className="w-full"
         />
+
 
         <div className="flex flex-wrap items-center gap-3">
           <CategoryFilter
