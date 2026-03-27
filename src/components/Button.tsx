@@ -38,7 +38,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       whileHover={prefersReduced || disabled ? undefined : { y: -2 }}
       whileTap={prefersReduced || disabled ? undefined : { scale: 0.96 }}
       transition={{ duration: 0.15, ease: "easeOut" }}
-      {...(props as object)}
+      {...props}
     >
       {children}
     </motion.button>
