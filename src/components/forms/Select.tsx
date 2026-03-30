@@ -1,72 +1,68 @@
-import { type ChangeEvent } from "react";
-import { FormField, type ValidationState } from "@/components/forms/FormField";
+"use client";
 
-interface Option {
-  value: string;
-  label: string;
-  disabled?: boolean;
-}
+import { ChangeEvent, useMemo } from "react";
+import { FormField } from "@/components/forms/FormField";
 
-interface SelectProps {
+export type SelectValidationState = "default" | "error" | "success" | "warning";
+type Option = { value: string; label: string };
+
+type Props = {
   id: string;
-  name: string;
   label: string;
   value: string;
   options: Option[];
-  status?: ValidationState;
+  onChange: (value: string) => void;
   helperText?: string;
-  error?: string;
+  errorText?: string;
+  validationState?: SelectValidationState;
   disabled?: boolean;
-  onChange: (event: ChangeEvent<HTMLSelectElement>) => void;
-}
+  required?: boolean;
+};
 
-const stateClasses: Record<ValidationState, string> = {
-  default: "border-gray-300 focus:border-purple-500 focus:ring-purple-500/20",
-  error: "border-red-400 focus:border-red-500 focus:ring-red-500/20",
-  success: "border-emerald-400 focus:border-emerald-500 focus:ring-emerald-500/20",
-  warning: "border-amber-400 focus:border-amber-500 focus:ring-amber-500/20",
+const stateOutline: Record<SelectValidationState, string> = {
+  default: "border-gray-300 focus:border-purple-500 focus:ring-purple-500/30",
+  success: "border-emerald-400 focus:border-emerald-500 focus:ring-emerald-500/30",
+  warning: "border-amber-400 focus:border-amber-500 focus:ring-amber-500/30",
+  error: "border-rose-400 focus:border-rose-500 focus:ring-rose-500/30",
 };
 
 export function Select({
   id,
-  name,
   label,
   value,
   options,
-  status = "default",
-  helperText,
-  error,
-  disabled = false,
   onChange,
-}: SelectProps) {
-  const describedBy = error ? `${id}-error` : helperText ? `${id}-helper` : undefined;
+  helperText,
+  errorText,
+  validationState = "default",
+  disabled = false,
+  required = false,
+}: Props) {
+  const outlineClass = useMemo(() => stateOutline[validationState], [validationState]);
 
   return (
-    <FormField id={id} label={label} status={status} helperText={helperText} error={error}>
-      <div className="relative">
-        <select
-          id={id}
-          name={name}
-          value={value}
-          onChange={onChange}
-          disabled={disabled}
-          aria-invalid={status === "error"}
-          aria-describedby={describedBy}
-          className={`w-full appearance-none rounded-xl border-2 bg-white px-4 py-3 text-sm text-ink focus:outline-none focus:ring-4 ${stateClasses[status]} disabled:cursor-not-allowed disabled:opacity-60`}
-        >
-          {options.map(option => (
-            <option key={option.value} value={option.value} disabled={option.disabled}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-
-        <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-ink/50">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-          </svg>
-        </span>
-      </div>
+    <FormField
+      id={id}
+      label={label}
+      helperText={helperText}
+      errorText={errorText}
+      validationState={validationState}
+      disabled={disabled}
+    >
+      <select
+        id={id}
+        value={value}
+        onChange={(event: ChangeEvent<HTMLSelectElement>) => onChange(event.target.value)}
+        disabled={disabled}
+        required={required}
+        className={`w-full rounded-lg border px-4 py-3 text-sm text-slate-900 transition-all focus:outline-none ${outlineClass} ${disabled ? "cursor-not-allowed bg-slate-100 text-slate-400" : "bg-white"}`}
+      >
+        {options.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
     </FormField>
   );
 }

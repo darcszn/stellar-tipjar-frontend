@@ -1,67 +1,51 @@
-import { type ReactNode } from "react";
+import { ReactNode } from "react";
 
-export type ValidationState = "default" | "error" | "success" | "warning";
+type ValidationState = "default" | "error" | "success" | "warning";
 
-interface FormFieldProps {
+type FormFieldProps = {
   id: string;
-  label?: string;
-  required?: boolean;
-  status?: ValidationState;
+  label: string;
   helperText?: string;
-  error?: string;
+  errorText?: string;
+  validationState?: ValidationState;
+  disabled?: boolean;
   children: ReactNode;
-  className?: string;
-}
+};
 
-const stateStyles: Record<ValidationState, string> = {
-  default: "text-ink/80",
-  error: "text-red-600",
-  success: "text-emerald-600",
-  warning: "text-amber-600",
+const stateColorClasses: Record<ValidationState, string> = {
+  default: "text-gray-500",
+  success: "text-emerald-500",
+  warning: "text-amber-500",
+  error: "text-rose-500",
 };
 
 export function FormField({
   id,
   label,
-  required = false,
-  status = "default",
   helperText,
-  error,
+  errorText,
+  validationState = "default",
+  disabled = false,
   children,
-  className = "",
 }: FormFieldProps) {
-  const helperId = `${id}-helper`;
-  const errorId = `${id}-error`;
+  const textColor = stateColorClasses[validationState];
 
   return (
-    <div className={`space-y-2 ${className}`}>
-      {label && (
-        <div className="flex items-center justify-between gap-2 text-sm font-medium">
-          <label htmlFor={id} className="text-ink">
-            {label}
-            {required && <span className="ml-1 text-red-500">*</span>}
-          </label>
-          {status !== "default" && (
-            <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${stateStyles[status]}`}>
-              {status.toUpperCase()}
-            </span>
-          )}
-        </div>
-      )}
-
+    <div className="mb-4">
+      <label htmlFor={id} className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
+        {label}
+      </label>
       {children}
-
-      {!error && helperText && (
-        <p id={helperId} className="text-xs text-ink/60">
-          {helperText}
-        </p>
-      )}
-
-      {error && (
-        <p id={errorId} role="alert" aria-live="assertive" className="text-xs text-red-500">
-          {error}
-        </p>
-      )}
+      <div className="mt-1 min-h-[1.25rem] text-sm">
+        {errorText ? (
+          <span className="text-rose-500">{errorText}</span>
+        ) : helperText ? (
+          <span className={textColor}>{helperText}</span>
+        ) : (
+          <span className="text-transparent">&nbsp;</span>
+        )}
+      </div>
+      {disabled && <p className="mt-1 text-xs text-slate-400">Disabled</p>}
     </div>
   );
 }

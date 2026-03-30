@@ -1,59 +1,71 @@
-import { type ChangeEvent, type InputHTMLAttributes } from "react";
-import { FormField, type ValidationState } from "@/components/forms/FormField";
+"use client";
 
-interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "onChange" | "id"> {
+import { ChangeEvent, useMemo } from "react";
+import { FormField } from "@/components/forms/FormField";
+
+export type InputValidationState = "default" | "error" | "success" | "warning";
+
+type Props = {
   id: string;
   label: string;
   value: string;
-  status?: ValidationState;
+  onChange: (value: string) => void;
+  type?: "text" | "email" | "password" | "number" | "tel";
+  placeholder?: string;
   helperText?: string;
-  error?: string;
-  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
-}
+  errorText?: string;
+  validationState?: InputValidationState;
+  disabled?: boolean;
+  required?: boolean;
+};
 
-const stateClasses: Record<ValidationState, string> = {
-  default: "border-gray-300 focus:border-purple-500 focus:ring-purple-500/20",
-  error: "border-red-400 focus:border-red-500 focus:ring-red-500/20",
-  success: "border-emerald-400 focus:border-emerald-500 focus:ring-emerald-500/20",
-  warning: "border-amber-400 focus:border-amber-500 focus:ring-amber-500/20",
+const stateOutline: Record<InputValidationState, string> = {
+  default: "border-gray-300 focus:border-purple-500 focus:ring-purple-500/30",
+  success: "border-emerald-400 focus:border-emerald-500 focus:ring-emerald-500/30",
+  warning: "border-amber-400 focus:border-amber-500 focus:ring-amber-500/30",
+  error: "border-rose-400 focus:border-rose-500 focus:ring-rose-500/30",
 };
 
 export function Input({
   id,
-  name,
   label,
   value,
   onChange,
-  status = "default",
+  type = "text",
+  placeholder = "",
   helperText,
-  error,
+  errorText,
+  validationState = "default",
   disabled = false,
-  className = "",
-  ...props
-}: InputProps) {
-  const describedBy = error ? `${id}-error` : helperText ? `${id}-helper` : undefined;
+  required = false,
+}: Props) {
+  const outlineClass = useMemo(() => stateOutline[validationState], [validationState]);
 
   return (
-    <FormField id={id} label={label} status={status} helperText={helperText} error={error}>
+    <FormField
+      id={id}
+      label={label}
+      helperText={helperText}
+      errorText={errorText}
+      validationState={validationState}
+      disabled={disabled}
+    >
       <div className="relative">
         <input
           id={id}
-          name={name}
-          type={props.type ?? "text"}
+          aria-invalid={validationState === "error"}
+          aria-describedby={errorText ? `${id}-error` : helperText ? `${id}-helper` : undefined}
           value={value}
-          onChange={onChange}
+          onChange={(event: ChangeEvent<HTMLInputElement>) => onChange(event.target.value)}
+          type={type}
+          placeholder={placeholder || " "}
+          required={required}
           disabled={disabled}
-          placeholder=" "
-          aria-invalid={status === "error"}
-          aria-describedby={describedBy}
-          aria-label={label}
-          autoComplete={props.autoComplete}
-          className={`peer w-full rounded-xl border-2 bg-white px-4 py-3 text-sm text-ink transition-all placeholder-transparent disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-4 ${stateClasses[status]} ${className}`}
-          {...props}
+          className={`peer w-full rounded-lg border px-4 py-3 text-sm text-slate-900 placeholder-transparent transition-all focus:outline-none ${outlineClass} ${disabled ? "cursor-not-allowed bg-slate-100 text-slate-400" : "bg-white"}`}
         />
         <label
           htmlFor={id}
-          className="absolute left-4 -top-2.5 bg-white px-1 text-sm text-ink/60 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-ink"
+          className="pointer-events-none absolute left-4 top-3 block text-sm text-slate-500 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-sm peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-purple-600 dark:peer-focus:text-purple-300"
         >
           {label}
         </label>

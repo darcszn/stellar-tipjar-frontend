@@ -7,12 +7,38 @@ export interface TeamMember {
   name: string;
   email?: string;
   split: number;
+  createdAt: string;
+  isActive: boolean;
+}
+
+export interface TeamInvitation {
+  id: string;
+  email: string;
+  sentAt: string;
+  status: "pending" | "accepted" | "rejected";
+  expiredAt?: string;
 }
 
 export interface TeamProfile {
+  id: string;
   name: string;
+  displayName?: string;
+  description?: string;
   members: TeamMember[];
+  invitations: TeamInvitation[];
+  owner?: string;
+  createdAt: string;
   updatedAt: string;
+  totalTipsReceived?: number;
+}
+
+export interface TeamStatistics {
+  memberCount: number;
+  activeMemberCount: number;
+  totalSplit: number;
+  isBalanced: boolean;
+  averageSplit: number;
+  totalTipsReceived: number;
 }
 
 const STORAGE_KEY = "stellar_tipjar_team_profiles";
@@ -30,83 +56,214 @@ const fmt = (date = new Date()) => new Date(date).toISOString();
 
 export function useTeam(teamName: string) {
   const [profiles, setProfiles] = useState<Record<string, TeamProfile>>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const raw = localStorage.getItem(STORAGE_KEY);
-    setProfiles(parse(raw));
+    try {
+      setIsLoading(true);
+      const raw = localStorage.getItem(STORAGE_KEY);
+      setProfiles(parse(raw));
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load team data");
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles));
+    } catch (err) {
+      console.error("Failed to save team data:", err);
+    }
   }, [profiles]);
 
-  const team = profiles[teamName] ?? { name: teamName, members: [], updatedAt: fmt() };
+  const team = profiles[teamName] ?? {
+    id: `team_${teamName}_${Date.now()}`,
+    name: teamName,
+    displayName: teamName,
+    description: "",
+    members: [],
+    invitations: [],
+    createdAt: fmt(),
+    updatedAt: fmt(),
+    totalTipsReceived: 0,
+  };
 
-  const createTeam = useCallback(() => {
-    if (profiles[teamName]) return;
-    setProfiles((prev) => ({
-      ...prev,
-      [teamName]: { name: teamName, members: [], updatedAt: fmt() },
-    }));
-  }, [teamName, profiles]);
-
-  const addMember = useCallback((member: { name: string; email?: string; split: number }) => {
-    setProfiles((prev) => {
-      const current = prev[teamName] ?? { name: teamName, members: [], updatedAt: fmt() };
-      const newMember = { id: `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, ...member };
-      return {
-        ...prev,
-        [teamName]: { ...current, members: [...current.members, newMember], updatedAt: fmt() },
-      };
-    });
-  }, [teamName]);
-
-  const removeMember = useCallback((memberId: string) => {
-    setProfiles((prev) => {
-      const current = prev[teamName];
-      if (!current) return prev;
-      return {
+  const createTeam = useCallback(
+    (displayName?: string, description?: string) => {
+      if (profiles[teamName]) return;
+      setProfiles((prev) => ({
         ...prev,
         [teamName]: {
-          ...current,
-          members: current.members.filter((m) => m.id !== memberId),
+          id: `team_${teamName}_${Date.now()}`,
+          name: teamName,
+          displayName: displayName || teamName,
+          description: description || "",
+          members: [],
+          invitations: [],
+          createdAt: fmt(),
           updatedAt: fmt(),
+          totalTipsReceived: 0,
         },
-      };
-    });
-  }, [teamName]);
+      }));
+    },
+    [teamName, profiles]
+  );
 
-  const updateSplit = useCallback((memberId: string, split: number) => {
-    setProfiles((prev) => {
-      const current = prev[teamName];
-      if (!current) return prev;
-      const newMembers = current.members.map((m) => (m.id === memberId ? { ...m, split } : m));
-      return {
-        ...prev,
-        [teamName]: { ...current, members: newMembers, updatedAt: fmt() },
-      };
-    });
-  }, [teamName]);
+  const addMember = useCallback(
+    (member: { name: string; email?: string; split: number }) => {
+      setProfiles((prev) => {
+        const current = prev[teamName] ?? team;
+        const newMember: TeamMember = {
+          id: `member_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          ...member,
+          createdAt: fmt(),
+          isActive: true,
+        };
+        return {
+          ...prev,
+          [teamName]: {
+            ...current,
+            members: [...current.members, newMember],
+            updatedAt: fmt(),
+          },
+        };
+      });
+    },
+    [teamName, team]
+  );
 
-  const totalSplit = useMemo(() => team.members.reduce((sum, member) => sum + member.split, 0), [team.members]);
+  const removeMember = useCallback(
+    (memberId: string) => {
+      setProfiles((prev) => {
+        const current = prev[teamName];
+        if (!current) return prev;
+        return {
+          ...prev,
+          [teamName]: {
+            ...current,
+            members: current.members.filter((m) => m.id !== memberId),
+            updatedAt: fmt(),
+          },
+        };
+      });
+    },
+    [teamName]
+  );
 
-  const splitStatus = totalSplit === 100 ? "balanced" : "unbalanced";
+  const updateMember = useCallback(
+    (memberId: string, updates: Partial<TeamMember>) => {
+      setProfiles((prev) => {
+        const current = prev[teamName];
+        if (!current) return prev;
+        const newMembers = current.members.map((m) =>
+          m.id === memberId ? { ...m, ...updates } : m
+        );
+        return {
+          ...prev,
+          [teamName]: { ...current, members: newMembers, updatedAt: fmt() },
+        };
+      });
+    },
+    [teamName]
+  );
 
-  const inviteMember = useCallback((email: string) => {
-    // Mock invite status in localStorage.
-    console.info(`Invite sent to ${email} for team ${teamName}`);
-  }, [teamName]);
+  const updateSplit = useCallback(
+    (memberId: string, split: number) => {
+      updateMember(memberId, { split: Math.max(0, Math.min(100, split)) });
+    },
+    [updateMember]
+  );
+
+  const removeSplit = useCallback(
+    (memberId: string) => {
+      updateMember(memberId, { isActive: false });
+    },
+    [updateMember]
+  );
+
+  const inviteMember = useCallback(
+    (email: string) => {
+      setProfiles((prev) => {
+        const current = prev[teamName] ?? team;
+        const newInvitation: TeamInvitation = {
+          id: `invite_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          email,
+          sentAt: fmt(),
+          status: "pending",
+          expiredAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        };
+        return {
+          ...prev,
+          [teamName]: {
+            ...current,
+            invitations: [
+              ...current.invitations.filter((inv) => inv.email !== email),
+              newInvitation,
+            ],
+            updatedAt: fmt(),
+          },
+        };
+      });
+    },
+    [teamName, team]
+  );
+
+  const cancelInvitation = useCallback(
+    (invitationId: string) => {
+      setProfiles((prev) => {
+        const current = prev[teamName];
+        if (!current) return prev;
+        return {
+          ...prev,
+          [teamName]: {
+            ...current,
+            invitations: current.invitations.filter((inv) => inv.id !== invitationId),
+            updatedAt: fmt(),
+          },
+        };
+      });
+    },
+    [teamName]
+  );
+
+  const stats = useMemo((): TeamStatistics => {
+    const activeMembers = team.members.filter((m) => m.isActive);
+    const totalSplit = activeMembers.reduce((sum, member) => sum + member.split, 0);
+
+    return {
+      memberCount: team.members.length,
+      activeMemberCount: activeMembers.length,
+      totalSplit,
+      isBalanced: totalSplit === 100 && activeMembers.length > 0,
+      averageSplit: activeMembers.length > 0 ? totalSplit / activeMembers.length : 0,
+      totalTipsReceived: team.totalTipsReceived || 0,
+    };
+  }, [team.members, team.totalTipsReceived]);
+
+  const splitStatus = stats.isBalanced ? "balanced" : "unbalanced";
+  const pendingInvitations = team.invitations.filter((inv) => inv.status === "pending");
 
   return {
     team,
+    stats,
+    isLoading,
+    error,
     createTeam,
     addMember,
     removeMember,
+    updateMember,
     updateSplit,
-    totalSplit,
+    removeSplit,
+    totalSplit: stats.totalSplit,
     splitStatus,
     inviteMember,
+    cancelInvitation,
+    pendingInvitations,
   };
 }
