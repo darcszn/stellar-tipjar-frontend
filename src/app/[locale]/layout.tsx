@@ -1,4 +1,7 @@
-import type { Metadata, Viewport } from "next";
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages } from 'next-intl/server';
+import { notFound } from 'next/navigation';
+import { routing } from '@/i18n/routing';
 import { Inter } from "next/font/google";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -16,63 +19,48 @@ import { ToastProvider } from "@/contexts/ToastContext";
 import { ToastContainer } from "@/components/Toast";
 import { Footer } from "@/components/Footer";
 import "@/styles/globals.css";
-import { buildMetadata } from "@/utils/seo";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "Stellar Tip Jar",
-  description: "Tip your favorite creators with Stellar assets.",
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "Stellar Tip Jar",
-  },
-  formatDetection: {
-    telephone: false,
-  },
-  icons: {
-    icon: "/icons/icon-192x192.png",
-    apple: "/icons/icon-192x192.png",
-  },
-};
-
-export const viewport: Viewport = {
-  themeColor: "#0066ff",
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-};
-
-export default function RootLayout({
+export default async function LocaleLayout({
   children,
-}: Readonly<{
+  params: { locale }
+}: {
   children: React.ReactNode;
-}>) {
+  params: { locale: string };
+}) {
+  // Ensure that the incoming `locale` is valid
+  if (!routing.locales.includes(locale as any)) {
+    notFound();
+  }
+
+  // Providing all messages to the client
+  // side is the easiest way to get started
+  const messages = await getMessages();
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body className={inter.className}>
         <SkipToContent />
         <PerformanceMonitor />
-        <ThemeProvider>
-        <I18nProvider>
         <CurrencyProvider>
         <WalletProvider>
           <ReactQueryProvider>
             <WebSocketProvider>
               <ToastProvider>
-              <div className="min-h-screen flex flex-col">
-                <Navbar />
-                <main
-                  id="main-content"
-                  tabIndex={-1}
-                  className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8 focus:outline-none flex-1"
-                >
-                  <PageTransition>{children}</PageTransition>
-                </main>
-                <Footer />
-              </div>
+                <NextIntlClientProvider messages={messages}>
+                  <div className="min-h-screen flex flex-col">
+                    <Navbar />
+                    <main
+                      id="main-content"
+                      tabIndex={-1}
+                      className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8 focus:outline-none flex-1"
+                    >
+                      <PageTransition>{children}</PageTransition>
+                    </main>
+                    <Footer />
+                  </div>
+                </NextIntlClientProvider>
               <InstallPrompt />
               <ToastContainer />
               </ToastProvider>
@@ -80,8 +68,6 @@ export default function RootLayout({
           </ReactQueryProvider>
         </WalletProvider>
         </CurrencyProvider>
-        </I18nProvider>
-        </ThemeProvider>
       </body>
     </html>
   );
